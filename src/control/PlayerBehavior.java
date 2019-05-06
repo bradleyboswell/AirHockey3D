@@ -2,12 +2,7 @@ package control;
 
 import java.util.Enumeration;
 
-import javax.media.j3d.Behavior;
-import javax.media.j3d.Bounds;
-
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.WakeupCriterion;
-import javax.media.j3d.WakeupOnElapsedFrames;
+import javax.media.j3d.*;
 import javax.vecmath.Vector3f;
 
 import model.Paddle;
@@ -16,22 +11,21 @@ import model.Rink;
 import view.Game;
 
 public class PlayerBehavior extends Behavior{
-	public WakeupCriterion frames;
+	private boolean player1;
 	
-	public boolean player1;
+	private WakeupCriterion frames = new WakeupOnElapsedFrames(5);		//for desktop
+	private static float horizontalV = 0.0015f;
+	private static float verticalV = 0.0015f;
+
+//	private WakeupCriterion frames = new WakeupOnElapsedFrames(1);		//for laptop	
+//	private static float horizontalV = 0.009f;	
+//	private static float verticalV = 0.009f;
 	
-	public static float horizontalV = 0.0015f;
-	public static float verticalV = 0.0015f;
+	private Vector3f pLocation;
+	private Transform3D move;
+	private Vector3f mover;
 	
-	//	public static float horizontalV = 0.009f;		//for laptop
-	//	public static float verticalV = 0.009f;
-	public Vector3f pLocation;
-	
-	public Transform3D move;
-	public Vector3f mover;
-	
-	public float p1nextX, p1nextZ, p2nextX, p2nextZ;
-	
+	private float p1nextX, p1nextZ, p2nextX, p2nextZ;
 	
 	public PlayerBehavior(Bounds bounds, Vector3f pLocation, boolean player1) {
 		this.setSchedulingBounds(bounds);
@@ -39,11 +33,8 @@ public class PlayerBehavior extends Behavior{
 		this.player1 = player1;
 	}
 	
-	
 	@Override
 	public void initialize() {
-		frames = new WakeupOnElapsedFrames(5);
-	//	frames = new WakeupOnElapsedFrames(1);				//for laptop
 		wakeupOn(frames);
 		
 	}
@@ -68,20 +59,8 @@ public class PlayerBehavior extends Behavior{
 		wakeupOn(frames);
 	}
 	
-	//Look ahead to make sure paddles wont collide with wall to prevent sticking.
-	private void predict(boolean p1isMoving,Vector3f increment) {
-		if(p1isMoving) {
-			p1nextX = pLocation.x + increment.x*horizontalV;
-			p1nextZ = pLocation.z + increment.z*verticalV;
-		}
-		else if (!p1isMoving) {
-			p2nextX = pLocation.x + increment.x*horizontalV;
-			p2nextZ = pLocation.z + increment.z*verticalV;
-		}
-	}
-
 	//Handle movement of paddles
-	public void translationHandler(Vector3f player) {
+	private void translationHandler(Vector3f player) {
 		Vector3f increment;
 		float p1Angle = 0;
 		boolean p1isMoving = false;
@@ -131,6 +110,7 @@ public class PlayerBehavior extends Behavior{
 			}
 		}
 		
+		//Check for collisions
 		if(p1isMoving&&player1) {
 			increment = getXY(p1Angle);
 			predict(p1isMoving,increment);
@@ -140,11 +120,33 @@ public class PlayerBehavior extends Behavior{
 			predict(p1isMoving, increment);
 			if(!wallCollisions(p1isMoving,increment)) moveP2Paddle(increment.x*horizontalV, increment.z*verticalV);
 		}
-		
 	}
 	
+	//Calculate new x and Y based on angle
+	private Vector3f getXY(float angle) {
+		Vector3f move = new Vector3f();
+		float rad = (float) Math.toRadians(angle);
+		float x = (float) Math.cos(rad);
+		float z = (float) Math.sin(rad);
+		move.setX(x);
+		move.setZ(z);
+		return move;
+	}
+	
+	//Look ahead to make sure paddles wont collide with wall to prevent sticking.
+	private void predict(boolean p1isMoving,Vector3f increment) {
+		if(p1isMoving) {
+			p1nextX = pLocation.x + increment.x*horizontalV;
+			p1nextZ = pLocation.z + increment.z*verticalV;
+		}
+		else if (!p1isMoving) {
+			p2nextX = pLocation.x + increment.x*horizontalV;
+			p2nextZ = pLocation.z + increment.z*verticalV;
+		}
+	}
+
 	//Check for wall collisions
-	public boolean wallCollisions(boolean p1isMoving, Vector3f increment) {
+	private boolean wallCollisions(boolean p1isMoving, Vector3f increment) {
 		boolean isColliding = false;
 		if(p1isMoving && player1) {
 			if(p1nextX + Paddle.radius > Rink.width-(Rink.depth/2)) {		//P1 Left Wall Collision
@@ -211,18 +213,5 @@ public class PlayerBehavior extends Behavior{
 		Game.player1Pos.get(mover);
 		move.setTranslation(mover);
 		Game.player1XfmGrp.setTransform(move);
-
 	}
-
-	//Calculate new x and Y based on angle
-	private Vector3f getXY(float angle) {
-		Vector3f move = new Vector3f();
-		float rad = (float) Math.toRadians(angle);
-		float x = (float) Math.cos(rad);
-		float z = (float) Math.sin(rad);
-		move.setX(x);
-		move.setZ(z);
-		return move;
-	}
-
 }

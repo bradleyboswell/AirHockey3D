@@ -1,15 +1,8 @@
 package view;
 
 import java.applet.Applet;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.GraphicsConfiguration;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.*;
+import java.awt.event.*;
 import java.net.URL;
 
 import javax.media.j3d.*;
@@ -29,12 +22,27 @@ import model.Rink;
 import model.ScoreBoard;
 import model.Walls;
 
+/**
+ * 
+ * @author Bradley Boswell
+ * @class Computer Graphics
+ * @controls
+ * StartGame: SpaceBar (window must be active)
+ * Player1 Paddle Controls 
+ * 		Up: W	
+ * 		Down: s
+ * 		Left: A  
+ * 		Right:D
+ * Player2 Paddle Controls
+ * 		Up: Up-Arrow
+ * 		Down: Down-Arrow
+ * 		Left: Left-Arrow
+ * 		Right: Right-Arrow
+ */
 
-
-public class Game extends Applet implements KeyListener, ActionListener{
+public class Game extends Applet implements KeyListener{
 	
 	protected BoundingSphere bounds = new BoundingSphere(new Point3d(0.36f,0.0,0.48f), 50.0f);
-	BranchGroup rootPuckBranchGrp, rootPaddleBranchGrp, rootGoalBranchGrp, rootScoreboardBranchGrp;
 	
 	public static TransformGroup puckXfmGrp = new TransformGroup();
 	public static TransformGroup player1XfmGrp = new TransformGroup();
@@ -42,7 +50,6 @@ public class Game extends Applet implements KeyListener, ActionListener{
 	public static TransformGroup p1ScoreboardXfmGrp = new TransformGroup();
 	public static TransformGroup p2ScoreboardXfmGrp = new TransformGroup();
 
-	
 	public static Transform3D puckPos, player1Pos, player2Pos, player1Scoreboard, player2Scoreboard;
 	public static ScoreBoard scoreboard;
 	public static Text3D scoreboardText;
@@ -63,7 +70,7 @@ public class Game extends Applet implements KeyListener, ActionListener{
 	public static boolean p1Input, p1Up, p1Down, p1Left, p1Right, p2Input, p2Up, p2Down, p2Left, p2Right;
 	public static boolean gameRunning = true;
 	
-	public static int mixerCount = 0;   // limit amount of mixers created for views;
+	private static int mixerCount = 0;   // limit amount of mixers created for views;
 	
 	public static void main(String[] args) {
 		new MainFrame(new Game(), 1600, 1000);
@@ -109,68 +116,62 @@ public class Game extends Applet implements KeyListener, ActionListener{
 		BranchGroup root = new BranchGroup();
 		buildLighting(root);
 		TransformGroup goalXfmGrp = new TransformGroup();
-		rootPuckBranchGrp = new BranchGroup();
-		rootPaddleBranchGrp = new BranchGroup();
-		rootGoalBranchGrp = new BranchGroup();
-		rootScoreboardBranchGrp = new BranchGroup();
 		scoreboard = new ScoreBoard();
 		
 		//ScoreBoard
 		Node scoreBoardNode = buildScoreBoard(scoreboard);
-		rootScoreboardBranchGrp.addChild(scoreBoardNode);	
+		root.addChild(scoreBoardNode);
 		
 		//Build rink and walls
-		Node rink = buildRink();
-		rootPuckBranchGrp.addChild(rink);		
-		Node rightWall = buildWalls(Walls.Side.RIGHT);
-		rootPuckBranchGrp.addChild(rightWall);		
-		Node leftWall = buildWalls(Walls.Side.LEFT);
-		rootPuckBranchGrp.addChild(leftWall);		
+		Node rink = buildRink();	
+		root.addChild(rink);		
+		Node rightWall = buildWalls(Walls.Side.RIGHT);	
+		root.addChild(rightWall);		
+		Node leftWall = buildWalls(Walls.Side.LEFT);	
+		root.addChild(leftWall);	
 		Node nearWall = buildWalls(Walls.Side.NEAR);
-		rootPuckBranchGrp.addChild(nearWall);		
+		root.addChild(nearWall);	
 		Node farWall = buildWalls(Walls.Side.FAR);
-		rootPuckBranchGrp.addChild(farWall);
+		root.addChild(farWall);
 		
 		//Puck 
 		Node nPuck = buildPuck();
-		rootPuckBranchGrp.addChild(nPuck);
+		root.addChild(nPuck);
 		
-		//Player 1 paddle, goal, and behavior
+		//Player 1 paddle, goal, goal-sound, and behavior
 		boolean p1 = true;
 		Node player1 = buildPaddle(p1);
 		addPaddleSound(p1, player1XfmGrp, 0.97f);
-		rootPaddleBranchGrp.addChild(player1);
+		root.addChild(player1);
 		
 		Node p1Goal = buildGoal(p1);
 		addGoalSound(p1,goalXfmGrp);
-		rootGoalBranchGrp.addChild(p1Goal);
+		root.addChild(p1Goal);
 		
 		PlayerBehavior playerB1 = new PlayerBehavior(bounds,player1Origin,p1);
 		playerB1.setSchedulingBounds(bounds);
-		rootPaddleBranchGrp.addChild(playerB1);
+		root.addChild(playerB1);
 		
 		//Player 2 paddle, goal, and behavior
 		p1 = false;
 		Node player2 = buildPaddle(p1);
 		addPaddleSound(p1, player2XfmGrp, 0.97f);
-		rootPaddleBranchGrp.addChild(player2);
+		root.addChild(player2);
+		
 		Node p2Goal = buildGoal(p1);
 		addGoalSound(p1,goalXfmGrp);
-		rootGoalBranchGrp.addChild(p2Goal);
+		root.addChild(p2Goal);
 		
 		PlayerBehavior playerB2 = new PlayerBehavior(bounds,player2Origin,p1);
 		playerB2.setSchedulingBounds(bounds);
-		rootPaddleBranchGrp.addChild(playerB2);
+		root.addChild(playerB2);
 		
 		//Puck Behavior 
 		PuckBehavior puckStep = new PuckBehavior(bounds, puckOrigin);
 		puckStep.setSchedulingBounds(bounds);
-		rootPuckBranchGrp.addChild(puckStep);
+		root.addChild(puckStep);
+	
 		
-		root.addChild(rootScoreboardBranchGrp);
-		root.addChild(rootGoalBranchGrp);
-		root.addChild(rootPuckBranchGrp);
-		root.addChild(rootPaddleBranchGrp);
 		root.addChild(goalXfmGrp);
 		addBackgroundNoise(root);
 		addWallSound(root);
@@ -211,17 +212,16 @@ public class Game extends Applet implements KeyListener, ActionListener{
 		BranchGroup scoreboardGroup = new BranchGroup();
 		
 		Appearance ap = new Appearance();
-		Color3f ambient = new Color3f(0.8f,0.8f,0.8f);
-		Color3f emissiveColour = new Color3f(0.1f, 0.1f, 0.1f);
-		Color3f specularColour = new Color3f(1.0f, 1.0f, 1.0f);
-		Color3f diffuseColour = new Color3f(1.0f, 1.0f, 1.0f);
-		float shimmer = 25.0f;
-		ap.setMaterial(new Material(ambient, emissiveColour,
-		        diffuseColour, specularColour, shimmer));
+		Color3f ambColor = new Color3f(0.8f,0.8f,0.8f);
+		Color3f emitColor = new Color3f(0.1f, 0.1f, 0.1f);
+		Color3f specColor = new Color3f(1.0f, 1.0f, 1.0f);
+		Color3f diffColor = new Color3f(1.0f, 1.0f, 1.0f);
+		float shine = 25.0f;
+		ap.setMaterial(new Material(ambColor, emitColor,diffColor, specColor, shine));
 		ap.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE, 0f));
 		
 		String scores = "Score: " + scoreboard.getPlayer1score() + " - " + scoreboard.getPlayer2score();
-		Font3D font = new Font3D(new Font("Serif", Font.BOLD, 1),new FontExtrusion());
+		Font3D font = new Font3D(new Font("Georgia", Font.BOLD, 1),new FontExtrusion());
 		scoreboardText = new Text3D(font,scores,new Point3f(Rink.width/2,Rink.depth*4,Rink.length+0.6f), Text3D.ALIGN_CENTER, Text3D.PATH_RIGHT);
 		
 		scoreboardText.setCapability(Text3D.ALLOW_STRING_WRITE);
@@ -262,8 +262,7 @@ public class Game extends Applet implements KeyListener, ActionListener{
 		Color3f specColor = new Color3f(1.0f,1.0f,1.0f);
 		Color3f diffColor = new Color3f(0.0f, 0.0f, 0.0f);
 		float shine = 128.0f;
-		ap.setMaterial(new Material(ambColor, emitColor,
-		        diffColor, specColor, shine));
+		ap.setMaterial(new Material(ambColor, emitColor, diffColor, specColor, shine));
 		ap.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE, 0f));
 		
 		Puck puck = new Puck(ap);
@@ -291,9 +290,8 @@ public class Game extends Applet implements KeyListener, ActionListener{
 	    Color3f emitColor = new Color3f(0.1f, 0.1f, 0.1f);
 	    Color3f specColor = new Color3f(1.0f, 1.0f, 1.0f);
 	    Color3f diffColor = new Color3f(1.0f, 0.84f, 0.0f);
-	    float shine = 128.0f;
-	    ap.setMaterial(new Material(ambColor, emitColor,
-	        diffColor, specColor, shine));
+	    float shine = 40.0f;
+	    ap.setMaterial(new Material(ambColor, emitColor, diffColor, specColor, shine));
 	    ap.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE, 0f));
 		
 	    Goal goal = new Goal(p1);
@@ -309,13 +307,12 @@ public class Game extends Applet implements KeyListener, ActionListener{
 		TransformGroup wallXfmGrp = new TransformGroup();
 		
 		Appearance ap = new Appearance();
-		Color3f ambientColour = new Color3f(0.21f, 0.18f, 0.13f);
-	    Color3f emissiveColour = new Color3f(0.1f, 0.1f, 0.1f);
-	    Color3f specularColour = new Color3f(1.0f, 1.0f, 1.0f);
-	    Color3f diffuseColour = new Color3f(0.43f, 0.36f, 0.26f);
-	    float shimmer = 40.0f;
-	    ap.setMaterial(new Material(ambientColour, emissiveColour,
-	        diffuseColour, specularColour, shimmer));
+		Color3f ambColor = new Color3f(0.21f, 0.18f, 0.13f);
+	    Color3f emitColor = new Color3f(0.1f, 0.1f, 0.1f);
+	    Color3f specColor = new Color3f(1.0f, 1.0f, 1.0f);
+	    Color3f diffColor = new Color3f(0.43f, 0.36f, 0.26f);
+	    float shine = 40.0f;
+	    ap.setMaterial(new Material(ambColor, emitColor, diffColor, specColor, shine));
 	    ap.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE, 0f));
 		Walls wall = new Walls(side);
 		wall.setAppearance(ap);
@@ -355,13 +352,12 @@ public class Game extends Applet implements KeyListener, ActionListener{
 	    ap.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE, 0f));
 	    
 	    if(player1) {
-	    	Color3f ambientColour = new Color3f(0.3f, 0.0f, 0.0f);
-		    Color3f emissiveColour = new Color3f(0.1f, 0.1f, 0.1f);
-		    Color3f specularColour = new Color3f(1.0f, 1.0f, 1.0f);
-		    Color3f diffuseColour = new Color3f(1.0f, 0.0f, 0.0f);
-		    float shimmer = 128.0f;
-		    ap.setMaterial(new Material(ambientColour, emissiveColour,
-			        diffuseColour, specularColour, shimmer));
+	    	Color3f ambColor = new Color3f(0.3f, 0.0f, 0.0f);
+		    Color3f emitColor = new Color3f(0.1f, 0.1f, 0.1f);
+		    Color3f specColor = new Color3f(1.0f, 1.0f, 1.0f);
+		    Color3f diffColor = new Color3f(1.0f, 0.0f, 0.0f);
+		    float shine = 128.0f;
+		    ap.setMaterial(new Material(ambColor, emitColor, diffColor, specColor, shine));
 		    
 		    Paddle paddle = new Paddle(player1, ap);
 		    
@@ -376,13 +372,12 @@ public class Game extends Applet implements KeyListener, ActionListener{
 	    	player1XfmGrp.addChild(paddle);
 	  		paddleGroup.addChild(paddle1Trans); 
 	    }else {
-	    	Color3f ambientColour = new Color3f(0.0f, 0.0f, 0.3f);
-		    Color3f emissiveColour = new Color3f(0.1f, 0.1f, 0.1f);
-		    Color3f specularColour = new Color3f(1.0f, 1.0f, 1.0f);
-		    Color3f diffuseColour = new Color3f(0.0f, 0.0f, 1.0f);
-		    float shimmer = 128.0f;
-		    ap.setMaterial(new Material(ambientColour, emissiveColour,
-			        diffuseColour, specularColour, shimmer));
+	    	Color3f ambColor = new Color3f(0.0f, 0.0f, 0.3f);
+		    Color3f emitColor = new Color3f(0.1f, 0.1f, 0.1f);
+		    Color3f specColor = new Color3f(1.0f, 1.0f, 1.0f);
+		    Color3f diffColor = new Color3f(0.0f, 0.0f, 1.0f);
+		    float shine = 128.0f;
+		    ap.setMaterial(new Material(ambColor, emitColor,diffColor, specColor, shine));
 		    
 		    Paddle paddle = new Paddle(player1, ap);
 		    
@@ -438,7 +433,7 @@ public class Game extends Applet implements KeyListener, ActionListener{
 	}
 	
 	//Add audio to scene 
-	public void addGoalSound(boolean g1, TransformGroup goal) {
+	private void addGoalSound(boolean g1, TransformGroup goal) {
 		MediaContainer sound = new MediaContainer(new String("file:GoalHit.wav"));
 		if(g1) {
 			g1Sound.setSoundData(sound);
@@ -465,7 +460,7 @@ public class Game extends Applet implements KeyListener, ActionListener{
 		}	
 	}
 	
-	public void addPaddleSound(boolean p1, TransformGroup player, float edgeInf) {
+	private void addPaddleSound(boolean p1, TransformGroup player, float edgeInf) {
 		Transform3D current  = new Transform3D();
 		Vector3f position = new Vector3f();
 		
@@ -475,7 +470,7 @@ public class Game extends Applet implements KeyListener, ActionListener{
 	
 			MediaContainer sound = new MediaContainer(new String("file:PaddleLong.wav"));
 			p1Sound.setSoundData(sound);
-			p1Sound.setReleaseEnable(true);				/////////////////
+			p1Sound.setReleaseEnable(true);				
 			p1Sound.setInitialGain(1.0f);
 			p1Sound.setPosition(new Point3f(position));
 			p1Sound.setCapability(PointSound.ALLOW_ENABLE_READ);
@@ -502,7 +497,7 @@ public class Game extends Applet implements KeyListener, ActionListener{
 		}
 	}
 	
-	public void addWallSound(BranchGroup bg) {
+	private void addWallSound(BranchGroup bg) {
 		MediaContainer sound = new MediaContainer(new String("file:WallHitLong.wav"));
 		wallSound.setSoundData(sound);
 		wallSound.setInitialGain(1.0f);
@@ -515,7 +510,7 @@ public class Game extends Applet implements KeyListener, ActionListener{
 		bg.addChild(wallSound);
 	}
 	
-	public void addBackgroundNoise(BranchGroup bg) {
+	private void addBackgroundNoise(BranchGroup bg) {
 		MediaContainer sound = new MediaContainer(new String("file:Ambience.wav"));
 		BackgroundSound source = new BackgroundSound(sound, 0.0f);	
 		source.setSchedulingBounds(bounds);
@@ -525,9 +520,6 @@ public class Game extends Applet implements KeyListener, ActionListener{
 	}
 	
 	//Event Listeners
-	@Override
-	public void actionPerformed(ActionEvent arg0) {}
-
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
