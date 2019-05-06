@@ -20,10 +20,16 @@ import view.Game;
 
 public class PuckBehavior extends Behavior{
 	public WakeupCriterion frames = new WakeupOnElapsedFrames(5);
+	
+//	public WakeupCriterion frames = new WakeupOnElapsedFrames(1);		//for laptop
 	int renderFrame=1;
 	
 	public static float horizontal = -0.0015f;
 	public static float vertical = -0.0009f;
+	
+//	public static float horizontal = -0.009f;
+//	public static float vertical = -0.009f;
+
 	public Vector3f location;
 	
 	

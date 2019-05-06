@@ -18,11 +18,13 @@ import view.Game;
 public class PlayerBehavior extends Behavior{
 	public WakeupCriterion frames;
 	
-
 	public boolean player1;
 	
 	public static float horizontalV = 0.0015f;
 	public static float verticalV = 0.0015f;
+	
+	//	public static float horizontalV = 0.009f;		//for laptop
+	//	public static float verticalV = 0.009f;
 	public Vector3f pLocation;
 	
 	public Transform3D move;
@@ -41,6 +43,7 @@ public class PlayerBehavior extends Behavior{
 	@Override
 	public void initialize() {
 		frames = new WakeupOnElapsedFrames(5);
+	//	frames = new WakeupOnElapsedFrames(1);				//for laptop
 		wakeupOn(frames);
 		
 	}
