@@ -66,6 +66,7 @@ public class Game extends Applet implements KeyListener{
 	public static PointSound g1Sound = new PointSound();		
 	public static PointSound g2Sound = new PointSound();
 	public static PointSound wallSound = new PointSound(); 	//CenterPoint sound source for simplicity
+
 	
 	public static boolean p1Input, p1Up, p1Down, p1Left, p1Right, p2Input, p2Up, p2Down, p2Left, p2Right;
 	public static boolean gameRunning = true;
@@ -469,12 +470,14 @@ public class Game extends Applet implements KeyListener{
 			current.get(position);
 	
 			MediaContainer sound = new MediaContainer(new String("file:PaddleLong.wav"));
+			sound.setCapability(PointSound.ALLOW_DURATION_READ);
 			p1Sound.setSoundData(sound);
 			p1Sound.setReleaseEnable(true);				
 			p1Sound.setInitialGain(1.0f);
 			p1Sound.setPosition(new Point3f(position));
 			p1Sound.setCapability(PointSound.ALLOW_ENABLE_READ);
 			p1Sound.setCapability(PointSound.ALLOW_ENABLE_WRITE);
+			p1Sound.setCapability(PointSound.ALLOW_DURATION_READ);
 			p1Sound.setSchedulingBounds(bounds);
 			p1Sound.setEnable(false);    						//Toggle
 			p1Sound.setLoop(0);

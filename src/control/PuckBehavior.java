@@ -26,6 +26,9 @@ public class PuckBehavior extends Behavior{
 	private Vector3f mover;
 	
 	private static float nextX,nextZ;
+	private double p1Duration = 0;	//Limit instantaneous repeat of audio sample
+	private double p2Duration = 0; 	
+	private double wallDuration = 0;
 	
 	public PuckBehavior(Bounds bounds, Vector3f location) {
 		this.setSchedulingBounds(bounds);
@@ -87,19 +90,31 @@ public class PuckBehavior extends Behavior{
 		if(nextX + Puck.radius > Rink.width-(Rink.depth/2f)) {  				//Left wall collide
 			horizontal = -horizontal;
 			nextX = (Rink.width - Rink.depth/2f) - Puck.radius;
-			Game.wallSound.setEnable(true);
+			if(System.currentTimeMillis()-wallDuration > 100) {				//Limit repetitive triggering of audio samples
+				Game.wallSound.setEnable(true);
+				wallDuration = System.currentTimeMillis();
+			}
 		}else if(nextX - Puck.radius < (Rink.depth/2f)) {				//Right wall collide
 			horizontal = -horizontal;
 			nextX = (Rink.depth/2f)+Puck.radius;
-			Game.wallSound.setEnable(true);
+			if(System.currentTimeMillis()-wallDuration > 100) {
+				Game.wallSound.setEnable(true);
+				wallDuration = System.currentTimeMillis();
+			}
 		}else if(nextZ + Puck.radius > Rink.length-(Rink.depth/2f)) { 	// Far wall collide
 			vertical = -vertical;
 			nextZ = (Rink.length-Rink.depth/2f) - Puck.radius;
-			Game.wallSound.setEnable(true);
+			if(System.currentTimeMillis()-wallDuration > 100) {
+				Game.wallSound.setEnable(true);
+				wallDuration = System.currentTimeMillis();
+			}
 		}else if(nextZ - Puck.radius < (Rink.depth/2f)) {				//Near wall collide
 			vertical = -vertical;
 			nextZ = (Rink.depth/2f)+Puck.radius;
-			Game.wallSound.setEnable(true);
+			if(System.currentTimeMillis()-wallDuration > 100) {
+				Game.wallSound.setEnable(true);
+				wallDuration = System.currentTimeMillis();
+			}
 		}
 	}
 	
@@ -108,15 +123,11 @@ public class PuckBehavior extends Behavior{
 		if(location.x >= 0.24f && location.x <= 0.48f) {
 			if(location.z + Puck.radius > Rink.length-(Rink.depth)-0.0001f) {		//Player1 Scored
 				Game.scoreboard.setPlayer1score(Game.scoreboard.getPlayer1score()+1);
-				System.out.println("Player 1 Scored a goal!");
-				System.out.println("Score: " + Game.scoreboard.getPlayer1score() + " : " + Game.scoreboard.getPlayer2score());
 				Game.scoreboardText.setString("Score: " + Game.scoreboard.getPlayer1score() + " : " + Game.scoreboard.getPlayer2score());
 				Game.g2Sound.setEnable(true);
 				reset();
 			}else if(location.z - Puck.radius < (Rink.depth)+0.0001f) {					//Player2 Scored
 				Game.scoreboard.setPlayer2score(Game.scoreboard.getPlayer2score()+1);
-				System.out.println("Player 2 Scored a goal!");
-				System.out.println("Score: " + Game.scoreboard.getPlayer1score() + " : " + Game.scoreboard.getPlayer2score());
 				Game.scoreboardText.setString("Score: " + Game.scoreboard.getPlayer1score() + " : " + Game.scoreboard.getPlayer2score());
 				Game.g1Sound.setEnable(true);
 				reset();
@@ -142,11 +153,17 @@ public class PuckBehavior extends Behavior{
 	//Control method for collisions with paddle
 	private void controlPaddleCollision(Vector3f p1, Vector3f p2) {				
 		if(testP1Collision(p1)) {
-			Game.p1Sound.setEnable(true);
+			if(System.currentTimeMillis()-p1Duration > 5000) {		//Limit repetitive triggering of audio sample
+				Game.p1Sound.setEnable(true);
+				p1Duration = System.currentTimeMillis();
+			}
 			executeP1Collision(p1);
 		}
 		if(testP1Collision(p2)) {
-			Game.p2Sound.setEnable(true);
+			if(System.currentTimeMillis()-p2Duration>500) {
+				Game.p2Sound.setEnable(true);	
+				p2Duration = System.currentTimeMillis();
+			}
 			executeP1Collision(p2);
 		}
 	}
