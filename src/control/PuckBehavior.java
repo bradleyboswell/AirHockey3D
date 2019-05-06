@@ -21,7 +21,7 @@ import view.Game;
 public class PuckBehavior extends Behavior{
 	public WakeupCriterion frames = new WakeupOnElapsedFrames(5);
 	
-//	public WakeupCriterion frames = new WakeupOnElapsedFrames(1);		//for laptop
+//	public WakeupCriterion frames = new WakeupOnElapsedFrames(1);		//for laptop different frame rate
 	int renderFrame=1;
 	
 	public static float horizontal = -0.0015f;
