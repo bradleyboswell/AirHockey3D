@@ -13,13 +13,13 @@ import view.Game;
 public class PlayerBehavior extends Behavior{
 	private boolean player1;
 	
-	private WakeupCriterion frames = new WakeupOnElapsedFrames(5);		//for desktop
-	private static float horizontalV = 0.0015f;
-	private static float verticalV = 0.0015f;
+//	private WakeupCriterion frames = new WakeupOnElapsedFrames(5);		//for desktop
+//	private static float horizontalV = 0.0015f;
+//	private static float verticalV = 0.0015f;
 
-//	private WakeupCriterion frames = new WakeupOnElapsedFrames(1);		//for laptop	
-//	private static float horizontalV = 0.009f;	
-//	private static float verticalV = 0.009f;
+	private WakeupCriterion frames = new WakeupOnElapsedFrames(1);		//for laptop	
+	private static float horizontalV = 0.008f;	
+	private static float verticalV = 0.008f;
 	
 	private Vector3f pLocation;
 	private Transform3D move;

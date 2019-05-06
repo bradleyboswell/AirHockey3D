@@ -13,13 +13,13 @@ import view.Game;
 public class PuckBehavior extends Behavior{
 	int renderFrame=1;
 	
-	private WakeupCriterion frames = new WakeupOnElapsedFrames(5);		//for desktop 
-	private static float horizontal = -0.0015f;
-	private static float vertical = -0.0009f;
+//	private WakeupCriterion frames = new WakeupOnElapsedFrames(5);		//for desktop 
+//	private static float horizontal = -0.0015f;
+//	private static float vertical = -0.0009f;
 	
-//	private WakeupCriterion frames = new WakeupOnElapsedFrames(1);		//for laptop different frame rate	
-//	private static float horizontal = -0.009f;
-//	private static float vertical = -0.009f;
+	private WakeupCriterion frames = new WakeupOnElapsedFrames(1);		//for laptop different frame rate	
+	private static float horizontal = -0.008f;
+	private static float vertical = -0.008f;
 
 	private Vector3f location;
 	private Transform3D move = new Transform3D();
@@ -153,14 +153,14 @@ public class PuckBehavior extends Behavior{
 	//Control method for collisions with paddle
 	private void controlPaddleCollision(Vector3f p1, Vector3f p2) {				
 		if(testP1Collision(p1)) {
-			if(System.currentTimeMillis()-p1Duration > 5000) {		//Limit repetitive triggering of audio sample
+			if(System.currentTimeMillis()-p1Duration > 100) {		//Limit repetitive triggering of audio sample
 				Game.p1Sound.setEnable(true);
 				p1Duration = System.currentTimeMillis();
 			}
 			executeP1Collision(p1);
 		}
 		if(testP1Collision(p2)) {
-			if(System.currentTimeMillis()-p2Duration>500) {
+			if(System.currentTimeMillis()-p2Duration>100) {
 				Game.p2Sound.setEnable(true);	
 				p2Duration = System.currentTimeMillis();
 			}
